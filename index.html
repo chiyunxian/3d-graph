@@ -10,7 +10,7 @@
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <title>方程空间 · 3D 方程构图器</title>
 <meta name="description" content="输入三个方程，在 x、y、z 三维空间中绘制曲面与围合图形。支持显式 z=f(x,y) 与隐式 F(x,y,z)=0。">
-<link rel="stylesheet" href="styles.css?v=4">
+<link rel="stylesheet" href="styles.css?v=5">
 </head>
 <body>
 <div id="app">
@@ -26,10 +26,6 @@
     <section class="section">
       <div class="section-head">
         <span>方程 / Equations</span>
-        <span>
-          <button class="preset" type="button" data-preset="cylinder">圆柱</button>
-          <button class="preset" type="button" data-preset="cone">锥面</button>
-        </span>
       </div>
       <div class="eq-list" id="eq-list">
         <label class="eq-row" data-index="0" style="--c:#60a5fa">
@@ -54,20 +50,7 @@
       <p class="hint">支持 <code>z = f(x,y)</code> 与隐式 <code>F(x,y,z)=0</code>；函数：sin、cos、sqrt、exp、abs、log 等。</p>
     </section>
 
-    <section class="section">
-      <div class="control">
-        <div class="control-row"><label for="range">坐标范围</label><output id="range-out">−5 … 5</output></div>
-        <input id="range" type="range" min="2" max="8" step="1" value="5">
-      </div>
-      <div class="control">
-        <div class="control-row"><label for="quality">采样精度</label></div>
-        <select id="quality">
-          <option value="36">标准 · 36</option>
-          <option value="48" selected>精细 · 48</option>
-          <option value="64">高精度 · 64</option>
-        </select>
-      </div>
-    </section>
+    <p class="fixed-meta">坐标范围固定 −5 … 5 · 标准采样 36³</p>
 
     <div class="actions">
       <button class="btn primary" id="render-btn" type="button">绘制图形 <kbd>Enter</kbd></button>
@@ -101,8 +84,8 @@
   </main>
 </div>
 
-<script src="three.min.js?v=4"></script>
-<script src="OrbitControls.js?v=4"></script>
-<script src="app.js?v=4"></script>
+<script src="three.min.js?v=5"></script>
+<script src="OrbitControls.js?v=5"></script>
+<script src="app.js?v=5"></script>
 </body>
 </html>
