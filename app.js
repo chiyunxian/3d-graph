@@ -216,7 +216,7 @@
    * ------------------------------------------------------------------ */
 
   const COLORS = ['#60a5fa', '#f472b6', '#34d399'];
-  const DEFAULTS = ['x^2 + y^2 = 4', 'z = 0', 'z = 4'];
+  const DEFAULTS = ['', '', ''];
   const state = {
     range: 5,
     quality: 48,
@@ -583,7 +583,7 @@
     if (state.showIntersections && valid.length > 1) {
       items.push('<div class="legend-item"><span class="legend-dot" style="background:#fbbf24"></span><code>曲面交线</code></div>');
     }
-    legend.innerHTML = items.join('') || '<div class="legend-item" style="color:#6f89a8">暂无有效方程</div>';
+    legend.innerHTML = items.join('') || '<div class="legend-item" style="color:#6f89a8">等待输入方程</div>';
   }
 
   function escapeHtml(s) {
@@ -598,7 +598,7 @@
       row.classList.remove('invalid');
       errorEl.textContent = '';
       try {
-        if (!raw.trim()) throw new Error('请输入方程');
+        if (!raw.trim()) return; // 空输入表示这一行不画，不报错
         parsed.push(parseEquation(raw));
       } catch (e) {
         row.classList.add('invalid');
@@ -606,6 +606,21 @@
       }
     });
     return parsed;
+  }
+
+  function showEmptyScene() {
+    if (!renderer) return;
+    clearWorld();
+    const R = state.range;
+    gridGroup = buildGrid(R);
+    axesGroup = buildAxes(R);
+    gridGroup.visible = state.showGrid;
+    axesGroup.visible = state.showAxes;
+    world.add(gridGroup);
+    world.add(axesGroup);
+    updateLegend([]);
+    statusEl.textContent = '请输入方程后点击绘制';
+    loading.hidden = true;
   }
 
   function draw() {
@@ -639,7 +654,8 @@
 
         updateLegend(valid);
         const ms = Math.round(performance.now() - start);
-        const msg = valid.length ? `已绘制 ${valid.length} 个方程 · ${state.quality}³ 采样 · ${ms} ms` : '没有可绘制的有效方程';
+        const hasInput = eqInputs.some(input => input.value.trim());
+        const msg = valid.length ? `已绘制 ${valid.length} 个方程 · ${state.quality}³ 采样 · ${ms} ms` : (hasInput ? '没有可绘制的有效方程' : '请输入方程后点击绘制');
         statusEl.textContent = msg;
       } catch (e) {
         console.error(e);
@@ -678,7 +694,7 @@
     state.autoRotate = false;
     state.equations = DEFAULTS.slice();
     syncUI();
-    draw();
+    showEmptyScene();
   }
 
   // events
@@ -730,7 +746,7 @@
   try {
     initThree();
     syncUI();
-    draw();
+    showEmptyScene();
   } catch (e) {
     console.error(e);
     document.getElementById('status').textContent = '当前浏览器不支持 WebGL';
