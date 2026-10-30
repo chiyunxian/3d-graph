@@ -23,8 +23,24 @@
   };
   const CONSTANTS = { pi: 'Math.PI', e: 'Math.E' };
 
+  const FULLWIDTH = /[０-９＋－＝×÷（）ｘｙｚ，]/;
+  const SUPER = { '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4', '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9' };
+
   function normalizeExpression(src) {
     return String(src || '')
+      .replace(/[０-９]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0xFEE0))
+      .replace(/[＋]/g, '+')
+      .replace(/[－]/g, '-')
+      .replace(/[＝]/g, '=')
+      .replace(/[×＊]/g, '*')
+      .replace(/[÷／]/g, '/')
+      .replace(/[（]/g, '(')
+      .replace(/[）]/g, ')')
+      .replace(/[，]/g, ',')
+      .replace(/[ｘ]/gi, 'x')
+      .replace(/[ｙ]/gi, 'y')
+      .replace(/[ｚ]/gi, 'z')
+      .replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]+/g, s => '^' + s.split('').map(c => SUPER[c]).join(''))
       .replace(/[−–—]/g, '-')
       .replace(/[×·]/g, '*')
       .replace(/÷/g, '/')
@@ -196,8 +212,9 @@
   }
 
   function parseEquation(raw) {
-    const text = String(raw || '').trim();
-    if (!text) throw new Error('请输入方程');
+    const original = String(raw || '').trim();
+    if (!original) throw new Error('请输入方程');
+    const text = normalizeExpression(original);
     const parts = text.split('=');
     if (parts.length !== 2) throw new Error('请使用“左边 = 右边”的形式');
     const leftText = parts[0].trim();
@@ -208,7 +225,7 @@
     const implicit = compileFunction({ type: 'binary', op: '-', left, right });
     const explicitZ = leftText.toLowerCase() === 'z' && !containsVar(right, 'z');
     const surface = explicitZ ? compileFunction(right, ['x', 'y']) : null;
-    return { raw: text, implicit, surface, explicitZ };
+    return { raw: original, implicit, surface, explicitZ };
   }
 
   /* ------------------------------------------------------------------ *
@@ -219,7 +236,7 @@
   const DEFAULTS = ['', '', ''];
   const state = {
     range: 5,
-    quality: 48,
+    quality: 36,
     showGrid: true,
     showAxes: true,
     showIntersections: true,
@@ -232,9 +249,6 @@
   const statusEl = document.getElementById('status');
   const legend = document.getElementById('legend');
   const renderBtn = document.getElementById('render-btn');
-  const rangeInput = document.getElementById('range');
-  const rangeOut = document.getElementById('range-out');
-  const qualitySelect = document.getElementById('quality');
   const gridToggle = document.getElementById('show-grid');
   const axesToggle = document.getElementById('show-axes');
   const intersectionsToggle = document.getElementById('show-intersections');
@@ -655,7 +669,7 @@
         updateLegend(valid);
         const ms = Math.round(performance.now() - start);
         const hasInput = eqInputs.some(input => input.value.trim());
-        const msg = valid.length ? `已绘制 ${valid.length} 个方程 · ${state.quality}³ 采样 · ${ms} ms` : (hasInput ? '没有可绘制的有效方程' : '请输入方程后点击绘制');
+        const msg = valid.length ? `已绘制 ${valid.length} 个方程 · 36³ 标准采样 · ${ms} ms` : (hasInput ? '没有可绘制的有效方程' : '请输入方程后点击绘制');
         statusEl.textContent = msg;
       } catch (e) {
         console.error(e);
@@ -668,9 +682,6 @@
   }
 
   function syncUI() {
-    rangeInput.value = state.range;
-    rangeOut.textContent = `−${state.range} … ${state.range}`;
-    qualitySelect.value = String(state.quality);
     gridToggle.checked = state.showGrid;
     axesToggle.checked = state.showAxes;
     intersectionsToggle.checked = state.showIntersections;
@@ -678,16 +689,9 @@
     eqInputs.forEach((input, i) => { input.value = state.equations[i] || ''; });
   }
 
-  function setPreset(name) {
-    if (name === 'cylinder') state.equations = ['x^2 + y^2 = 4', 'z = 0', 'z = 4'];
-    if (name === 'cone') state.equations = ['z = sqrt(x^2 + y^2)', 'z = 0', 'z = 4'];
-    syncUI();
-    draw();
-  }
-
   function resetAll() {
     state.range = 5;
-    state.quality = 48;
+    state.quality = 36;
     state.showGrid = true;
     state.showAxes = true;
     state.showIntersections = true;
@@ -700,15 +704,6 @@
   // events
   renderBtn.addEventListener('click', draw);
   document.getElementById('reset-btn').addEventListener('click', resetAll);
-  rangeInput.addEventListener('input', () => {
-    state.range = Number(rangeInput.value);
-    rangeOut.textContent = `−${state.range} … ${state.range}`;
-  });
-  rangeInput.addEventListener('change', draw);
-  qualitySelect.addEventListener('change', () => {
-    state.quality = Number(qualitySelect.value);
-    draw();
-  });
   gridToggle.addEventListener('change', () => {
     state.showGrid = gridToggle.checked;
     if (gridGroup) gridGroup.visible = state.showGrid;
@@ -737,9 +732,6 @@
       state.equations[i] = '';
       eqInputs[i].focus();
     });
-  });
-  document.querySelectorAll('.preset').forEach(btn => {
-    btn.addEventListener('click', () => setPreset(btn.dataset.preset));
   });
 
   function cleanLegacyExamples() {
