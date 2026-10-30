@@ -742,9 +742,17 @@
     btn.addEventListener('click', () => setPreset(btn.dataset.preset));
   });
 
+  function cleanLegacyExamples() {
+    eqInputs.forEach((input, i) => {
+      if (/例如/.test(input.placeholder)) input.placeholder = `输入第 ${i + 1} 个方程`;
+      if (input.value === 'x^2 + y^2 = 4' || input.value === 'z = 0' || input.value === 'z = 4') input.value = '';
+    });
+  }
+
   // boot
   try {
     initThree();
+    cleanLegacyExamples();
     syncUI();
     showEmptyScene();
   } catch (e) {
