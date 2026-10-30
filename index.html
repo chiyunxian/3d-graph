@@ -1,0 +1,105 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#070b14">
+<title>鏂圭▼绌洪棿 路 3D 鏂圭▼鏋勫浘鍣?/title>
+<meta name="description" content="杈撳叆涓変釜鏂圭▼锛屽湪 x銆亂銆亃 涓夌淮绌洪棿涓粯鍒舵洸闈笌鍥村悎鍥惧舰銆傛敮鎸佹樉寮?z=f(x,y) 涓庨殣寮?F(x,y,z)=0銆?>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="app">
+  <aside class="panel">
+    <div class="brand">
+      <div class="brand-mark">xyz</div>
+      <div>
+        <h1>鏂圭▼绌洪棿</h1>
+        <p>3D EQUATION PLOTTER</p>
+      </div>
+    </div>
+
+    <section class="section">
+      <div class="section-head">
+        <span>鏂圭▼ / Equations</span>
+        <span>
+          <button class="preset" type="button" data-preset="cylinder">鍦嗘煴</button>
+          <button class="preset" type="button" data-preset="cone">閿ラ潰</button>
+        </span>
+      </div>
+      <div class="eq-list" id="eq-list">
+        <label class="eq-row" data-index="0" style="--c:#60a5fa">
+          <span class="eq-dot"></span>
+          <input class="eq-input" type="text" spellcheck="false" autocomplete="off" placeholder="渚嬪锛歺^2 + y^2 = 4" aria-label="鏂圭▼ 1">
+          <button class="eq-clear" type="button" aria-label="娓呯┖鏂圭▼ 1">脳</button>
+          <span class="eq-error" role="alert"></span>
+        </label>
+        <label class="eq-row" data-index="1" style="--c:#f472b6">
+          <span class="eq-dot"></span>
+          <input class="eq-input" type="text" spellcheck="false" autocomplete="off" placeholder="渚嬪锛歾 = 0" aria-label="鏂圭▼ 2">
+          <button class="eq-clear" type="button" aria-label="娓呯┖鏂圭▼ 2">脳</button>
+          <span class="eq-error" role="alert"></span>
+        </label>
+        <label class="eq-row" data-index="2" style="--c:#34d399">
+          <span class="eq-dot"></span>
+          <input class="eq-input" type="text" spellcheck="false" autocomplete="off" placeholder="渚嬪锛歾 = 4" aria-label="鏂圭▼ 3">
+          <button class="eq-clear" type="button" aria-label="娓呯┖鏂圭▼ 3">脳</button>
+          <span class="eq-error" role="alert"></span>
+        </label>
+      </div>
+      <p class="hint">鏀寔 <code>z = f(x,y)</code> 涓庨殣寮?<code>F(x,y,z)=0</code>锛涘嚱鏁帮細sin銆乧os銆乻qrt銆乪xp銆乤bs銆乴og 绛夈€?/p>
+    </section>
+
+    <section class="section">
+      <div class="control">
+        <div class="control-row"><label for="range">鍧愭爣鑼冨洿</label><output id="range-out">鈭? 鈥?5</output></div>
+        <input id="range" type="range" min="2" max="8" step="1" value="5">
+      </div>
+      <div class="control">
+        <div class="control-row"><label for="quality">閲囨牱绮惧害</label></div>
+        <select id="quality">
+          <option value="36">鏍囧噯 路 36</option>
+          <option value="48" selected>绮剧粏 路 48</option>
+          <option value="64">楂樼簿搴?路 64</option>
+        </select>
+      </div>
+    </section>
+
+    <div class="actions">
+      <button class="btn primary" id="render-btn" type="button">缁樺埗鍥惧舰 <kbd>Enter</kbd></button>
+      <button class="btn" id="reset-btn" type="button">閲嶇疆</button>
+    </div>
+
+    <div class="toggles">
+      <label class="toggle"><input type="checkbox" id="show-grid" checked>鏄剧ず缃戞牸</label>
+      <label class="toggle"><input type="checkbox" id="show-axes" checked>鏄剧ず鍧愭爣杞?/label>
+      <label class="toggle"><input type="checkbox" id="show-intersections" checked>鏄剧ず浜ょ嚎</label>
+      <label class="toggle"><input type="checkbox" id="auto-rotate">鑷姩鏃嬭浆</label>
+    </div>
+
+    <div class="panel-foot">
+      鎷栨嫿鏃嬭浆 路 婊氳疆缂╂斁 路 鍙抽敭/鍙屾寚骞崇Щ<br>
+      闅愬紡鏇查潰浠ョ偣浜戝憟鐜帮紝浜ょ嚎浠ラ噾鑹茬偣鏍囧嚭銆?    </div>
+  </aside>
+
+  <main class="stage">
+    <div id="viewport"></div>
+    <div class="overlay-top">
+      <p class="kicker">Three-dimensional space</p>
+      <h2>x 路 y 路 z</h2>
+      <p>杈撳叆鏂圭▼锛岃瀵熸洸闈㈠浣曞洿鍑虹┖闂淬€?/p>
+    </div>
+    <div id="status" role="status">鍑嗗灏辩华</div>
+    <div id="legend"></div>
+    <div class="view-hint"><kbd>鎷栨嫿</kbd> 鏃嬭浆銆€<kbd>婊氳疆</kbd> 缂╂斁</div>
+    <div id="loading"><div><div class="spinner"></div>姝ｅ湪璁＄畻鏇查潰鈥?/div></div>
+  </main>
+</div>
+
+<script src="three.min.js"></script>
+<script src="OrbitControls.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
+
